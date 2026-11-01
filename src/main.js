@@ -14,8 +14,7 @@ import {
 
 const form = document.querySelector('.form');
 const searchInput = document.querySelector('.search-input');
-
-let activeRequestId = 0;
+const searchButton = form.querySelector('button[type="submit"]');
 
 form.addEventListener('submit', handleSearch);
 
@@ -34,17 +33,14 @@ function handleSearch(event) {
     return;
   }
 
-  const currentRequestId = ++activeRequestId;
-
   clearGallery();
   showLoader();
 
+  searchButton.disabled = true;
+  searchInput.disabled = true;
+
   getImagesByQuery(query)
     .then(data => {
-      if (currentRequestId !== activeRequestId) {
-        return;
-      }
-
       if (data.hits.length === 0) {
         iziToast.error({
           message:
@@ -63,10 +59,6 @@ function handleSearch(event) {
       createGallery(data.hits);
     })
     .catch(() => {
-      if (currentRequestId !== activeRequestId) {
-        return;
-      }
-
       iziToast.error({
         message:
           'Unable to load images. Please check your connection and try again!',
@@ -79,8 +71,8 @@ function handleSearch(event) {
       });
     })
     .finally(() => {
-      if (currentRequestId === activeRequestId) {
-        hideLoader();
-      }
+      hideLoader();
+      searchButton.disabled = false;
+      searchInput.disabled = false;
     });
 }
